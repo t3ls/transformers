@@ -606,6 +606,7 @@ class GPTQConfig(QuantizationConfigMixin):
         batch_size: int = 1,
         pad_token_id: Optional[int] = None,
         use_exllama: Optional[bool] = None,
+        use_marlin: Optional[bool] = None,
         max_input_length: Optional[int] = None,
         exllama_config: Optional[Dict[str, Any]] = None,
         cache_block_outputs: bool = True,
@@ -628,6 +629,7 @@ class GPTQConfig(QuantizationConfigMixin):
         self.batch_size = batch_size
         self.pad_token_id = pad_token_id
         self.use_exllama = use_exllama
+        self.use_marlin = use_marlin
         self.max_input_length = max_input_length
         self.exllama_config = exllama_config
         self.disable_exllama = kwargs.pop("disable_exllama", None)
@@ -637,7 +639,7 @@ class GPTQConfig(QuantizationConfigMixin):
 
     def get_loading_attributes(self):
         attibutes_dict = copy.deepcopy(self.__dict__)
-        loading_attibutes = ["disable_exllama", "use_exllama", "exllama_config", "use_cuda_fp16", "max_input_length"]
+        loading_attibutes = ["disable_exllama", "use_exllama", "use_marlin", "exllama_config", "use_cuda_fp16", "max_input_length"]
         loading_attibutes_dict = {i: j for i, j in attibutes_dict.items() if i in loading_attibutes}
         return loading_attibutes_dict
 
@@ -668,7 +670,8 @@ class GPTQConfig(QuantizationConfigMixin):
                     f"""dataset needs to be either a list of string or a value in
                     ['wikitext2','c4','c4-new'], but we found {self.dataset}"""
                 )
-
+        if self.use_marlin is not None:
+            self.use_exllama = False
         if self.disable_exllama is None and self.use_exllama is None:
             # New default behaviour
             self.use_exllama = True
